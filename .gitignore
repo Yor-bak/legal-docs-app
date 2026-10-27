@@ -1,0 +1,16 @@
+.env
+keys/*.json
+venv/
+__pycache__/
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+
+# Herramientas de IA (configuración local)
+.claude/
+.cursor/
+.windsurf/
+.codex/
+.aider*

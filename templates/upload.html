@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Subir documento</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Subir documento</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}<div class="flash ok">{{ messages[0] }}</div>{% endif %}
+  {% endwith %}
+  <form method="post" enctype="multipart/form-data">
+    <input type="file" name="file" required>
+    <button type="submit">Subir</button>
+  </form>
+  <p class="hint">Este rol solo puede subir. No puede ver ni listar archivos. · <a href="/logout">Salir</a></p>
+</body>
+</html>

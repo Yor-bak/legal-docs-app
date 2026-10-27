@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Documentos Legales</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Documentos Legales</h1>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}<div class="flash error">{{ messages[0] }}</div>{% endif %}
+  {% endwith %}
+  <form method="post" action="/login">
+    <input type="password" name="token" placeholder="Token de acceso" required>
+    <button type="submit">Entrar</button>
+  </form>
+</body>
+</html>

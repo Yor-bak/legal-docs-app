@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Panel admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="max-width: 600px;">
+  <h1>Documentos</h1>
+  <table>
+    <tr><th>Archivo</th><th>Tamaño</th><th></th></tr>
+    {% for f in files %}
+    <tr>
+      <td>{{ f.name }}</td>
+      <td>{{ f.size }} bytes</td>
+      <td><a href="{{ f.url }}" target="_blank">Abrir</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="hint">El link caduca en 1 hora. · <a href="/logout">Salir</a></p>
+</body>
+</html>
