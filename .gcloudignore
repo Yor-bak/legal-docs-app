@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+.env.example
+keys/
+venv/
+__pycache__/
+.DS_Store
+.vscode/
+.idea/

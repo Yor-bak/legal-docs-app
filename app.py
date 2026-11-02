@@ -2,7 +2,8 @@ import os
 import datetime
 from flask import Flask, request, render_template, redirect, url_for, session, flash
 from google.cloud import storage
-from google.oauth2 import service_account
+import google.auth
+import google.auth.transport.requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,16 +14,14 @@ app.secret_key = os.environ.get("FLASK_SECRET", "dev-secret-cambiar")
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 ADMIN_TOKEN = os.environ["ADMIN_TOKEN"]
 UPLOADER_TOKEN = os.environ["UPLOADER_TOKEN"]
-ADMIN_KEY_PATH = os.environ["ADMIN_KEY_PATH"]
-UPLOADER_KEY_PATH = os.environ["UPLOADER_KEY_PATH"]
+SERVICE_ACCOUNT_EMAIL = os.environ["SERVICE_ACCOUNT_EMAIL"]
 
 
-def get_client(role):
-    """Cada rol usa su propia service account: la separación de permisos
-    ocurre a nivel de IAM en GCP, no solo en el código de la app."""
-    key_path = ADMIN_KEY_PATH if role == "admin" else UPLOADER_KEY_PATH
-    creds = service_account.Credentials.from_service_account_file(key_path)
-    return storage.Client(credentials=creds, project=creds.project_id)
+def get_client():
+    """Usa las credenciales por defecto del entorno (ADC): la SA default
+    de App Engine en producción, o `gcloud auth application-default login`
+    en local."""
+    return storage.Client()
 
 
 @app.route("/")
@@ -60,7 +59,7 @@ def upload_panel():
             flash("Selecciona un archivo")
             return redirect(url_for("upload_panel"))
 
-        client = get_client("uploader")
+        client = get_client()
         bucket = client.bucket(BUCKET_NAME)
         timestamp = datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
         blob_name = f"{timestamp}-{file.filename}"
@@ -77,16 +76,20 @@ def admin_panel():
     if session.get("role") != "admin":
         return redirect(url_for("index"))
 
-    client = get_client("admin")
+    client = get_client()
     bucket = client.bucket(BUCKET_NAME)
     blobs = list(bucket.list_blobs())
 
     files = []
     for blob in blobs:
+        credentials, _ = google.auth.default()
+        credentials.refresh(google.auth.transport.requests.Request())
         url = blob.generate_signed_url(
             version="v4",
             expiration=datetime.timedelta(hours=1),
             method="GET",
+            service_account_email=SERVICE_ACCOUNT_EMAIL,
+            access_token=credentials.token,
         )
         files.append({"name": blob.name, "url": url, "size": blob.size})
 
